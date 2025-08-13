@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RestApiMantenimientoEF.Modelos;
+using RestApiMantenimientoEF.Interfaces;
+using RestApiMantenimientoEF.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<MantenimientoContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+builder.Services.AddScoped<IEventoRepository, EventosRepository>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

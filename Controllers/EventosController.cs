@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using RestApiMantenimientoEF.Modelos;
 using Microsoft.EntityFrameworkCore;  // Necesario para ToListAsync
 using RestApiMantenimientoEF.Modelos.DTOs;
+using RestApiMantenimientoEF.Interfaces;
 
 namespace RestApiMantenimientoEF.Controllers
 {
@@ -10,96 +11,100 @@ namespace RestApiMantenimientoEF.Controllers
     public class EventosController : ControllerBase
     {
         private readonly MantenimientoContext _context;
+        private readonly IEventoRepository _eventoRepository;
 
-        public EventosController(MantenimientoContext context)
+        public EventosController(MantenimientoContext context, IEventoRepository eventoRepository)
         {
             _context = context;
+            _eventoRepository = eventoRepository;
         }
 
         // Aquí puedes agregar métodos específicos para manejar eventos si es necesario
         [HttpGet("get")]
         public async Task<ActionResult<IEnumerable<Evento>>> GetEventos()
         {
-            if (_context.Eventos == null)
+            /*if (_context.Eventos == null)
             {
                 return NotFound();
             }
-            return await _context.Eventos.ToListAsync();
+            return await _context.Eventos.ToListAsync();*/
+
+            var eventos = await _eventoRepository.GetEventosAsync();
+            if (eventos == null || !eventos.Any())
+            {
+                return NotFound();
+            }
+            return eventos.ToList();
         }
 
         [HttpGet("get/{id}")]
-        public async Task<ActionResult<EventoDto>> GetEvento(int id)
+        public async Task<ActionResult<EventoDto>> GetEventoById(int id)
         {
             //var evento = await _context.Eventos.FindAsync(id);
-            var evento = await _context.Eventos
+            /*var evento = await _context.Eventos
                 .Include(e => e.IdUbicacionNavigation)
                 .Include(e => e.IdProblemasEquiposNavigation)
                     .ThenInclude(pe => pe.IdProblemaNavigation)
                 .Include(e => e.IdProblemasEquiposNavigation)
                     .ThenInclude(pe => pe.IdEquiposNavigation)
-                .FirstOrDefaultAsync(e => e.IdEvento == id);
+                .FirstOrDefaultAsync(e => e.IdEvento == id);*/
+
+            var evento = await _eventoRepository.GetEventoByIdAsync(id);
 
             if (evento == null)
             {
                 return NotFound();
             }
 
-            // Mapeamos el modelo de EF al DTO
-            var eventoDto = new EventoDto
-            {
-                IdEvento = evento.IdEvento,
-                Observacion = evento.Observacion,
-                FechaReporte = evento.FechaReporte,
-                FechaResolucion = evento.FechaResolucion,
-                Activo = evento.Activo,
-                ComentariosFinales = evento.ComentariosFinales,
-                NombreUbicacion = evento.IdUbicacionNavigation?.NombreUbicacion,
-
-                // Ahora accedemos a los datos de segundo nivel
-                NombreProblema = evento.IdProblemasEquiposNavigation?.IdProblemaNavigation?.NombreProblema,
-                NombreEquipo = evento.IdProblemasEquiposNavigation?.IdEquiposNavigation?.NombreEquipo
-            };
-
-            return eventoDto;
+            return Ok(evento);
         }
 
-        [HttpPost("create/{IdColaborador}")]
-        public async Task<ActionResult<Evento>> PostEvento(int IdColaborador, [FromBody] Evento evento)
+        // Obtener los eventos activos de un area de soporte
+        [HttpGet("get/activos/{idAreaS}")]
+        public async Task<ActionResult<IEnumerable<EventoDto>>> GetEventosActivos(int idAreaS)
         {
-            if (_context.Eventos == null)
+            var eventos = await _eventoRepository.GetEventosActivosAsync(idAreaS);
+            if (eventos == null || !eventos.Any())
             {
-                return Problem("Entity set 'MantenimientoContext.Eventos' is null.");
+                return NotFound();
             }
-            _context.Eventos.Add(evento);
+            return eventos.ToList();
+        }
 
-            // Creamos y configuramos el registro para Detallecolaboradore.
-            var detalleColaborador = new Detallecolaboradore
+        [HttpPost("create/")]
+        public async Task<ActionResult<Evento>> PostEvento([FromBody] InsertEventoDto evento)
+        {
+            var eventoCreado = await _eventoRepository.CreateEventoAsync(evento);
+            if (eventoCreado == null)
             {
-                IdColaborador = IdColaborador, // Asignamos un colaborador existente
-                Accion = "Reporte",
-                IdAsignador = null
-                // No asignamos el IdEvento todavía. EF lo hará por nosotros.
-            };
-
-            // Agregamos el detalle al evento. Esto crea el vínculo.
-            evento.Detallecolaboradores.Add(detalleColaborador);
-
-            // Creamos y configuramos el registro para Detalleestado.
-            var detalleEstado = new Detalleestado
+                return Problem("Error al crear el evento.");
+            }
+            var DetallecolaboradorInsert = await _eventoRepository.InsertDetallecolaboradoresAsync(new Detallecolaboradore
+            {
+                IdColaborador = evento.IdColaborador,
+                IdEvento = eventoCreado.IdEvento
+            });
+            var DetalleestadoInsert = await _eventoRepository.InsertDetalleestadoAsync(new Detalleestado
             {
                 IdEstado = 1, // 1 = Reportado
-                Fecha = DateTime.Now, // La fecha y hora actual del servidor.
-                // No asignamos el IdEvento. EF lo hará por nosotros.
-            };    
-
-            // 5. Agregamos el detalle al evento. Esto crea el vínculo.
-            evento.Detalleestados.Add(detalleEstado);            
-
-            // Guardamos los cambios en la base de datos en una sola transaccion
-            await _context.SaveChangesAsync();
+                Fecha = DateTime.Now,
+                IdEvento = eventoCreado.IdEvento
+            });
 
             // Aquí está el cambio. Apuntamos al nombre del método y pasamos el id.
-            return CreatedAtAction(nameof(GetEvento), new { id = evento.IdEvento }, evento);
+            return CreatedAtAction(nameof(GetEventoById), new { id = eventoCreado.IdEvento }, eventoCreado);
+        }
+
+        [HttpPost("create/detalles")]
+        public async Task<ActionResult> PostEventoConDetalles([FromBody] InsertEventoDto evento)
+        {
+            var eventoCreado = await _eventoRepository.CreateEventoConDetallesAsync(evento);
+            if (eventoCreado == null)
+            {
+                return Problem("Error al crear el evento.");
+            }
+
+            return CreatedAtAction(nameof(GetEventoById), new { id = eventoCreado.IdEvento }, eventoCreado);
         }
 
         [HttpPut("put/{id}")]
@@ -110,22 +115,10 @@ namespace RestApiMantenimientoEF.Controllers
                 return BadRequest(); // Retorna un 400 si el ID de la URL no coincide con el ID del objeto
             }
 
-            _context.Entry(evento).State = EntityState.Modified;
-
-            try
+            var eventoActualizado = await _eventoRepository.UpdateEventoAsync(evento);
+            if (!eventoActualizado)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EventoExists(id))
-                {
-                    return NotFound(); // Retorna un 404 si el evento no existe
-                }
-                else
-                {
-                    throw;
-                }
+                return Problem("Error al actualizar el evento.");
             }
 
             return NoContent(); // Retorna un 204 para indicar que la operación fue exitosa
@@ -134,26 +127,35 @@ namespace RestApiMantenimientoEF.Controllers
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteEvento(int id)
         {
-            if (_context.Eventos == null)
+            var eventoEliminado = await _eventoRepository.DeleteEventoAsync(id);
+            if (!eventoEliminado)
             {
-                return NotFound();
+                return Problem("Error al eliminar el evento.");
             }
 
-            var evento = await _context.Eventos.FindAsync(id);
-            if (evento == null)
-            {
-                return NotFound();
-            }
-
-            _context.Eventos.Remove(evento);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return NoContent(); // Retorna un 204 para indicar que la operación fue exitosa
         }
 
-        private bool EventoExists(int id)
+        [HttpPost("InsertAccion")]
+        public async Task<IActionResult> InsertarAccionAsync([FromBody] AccionDTO accionDTO)
         {
-            return (_context.Eventos?.Any(e => e.IdEvento == id)).GetValueOrDefault();
+            try
+            {
+                var insertarNuevaAccion = await _eventoRepository.InsertAccionAsync(accionDTO);
+                return NoContent(); // Retorna un 204 para indicar que la operación fue exitosa
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message); // 404 Not Found
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message); // 400 Bad Request
+            }
+            catch (Exception ex)
+            {
+                return Problem("Error al insertar la acción.");
+            }
         }
     }
 }

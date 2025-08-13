@@ -15,5 +15,15 @@ namespace RestApiMantenimientoEF.Modelos.DTOs
         // Propiedades del problema y equipo
         public string? NombreProblema { get; set; }
         public string? NombreEquipo { get; set; }
+        public string? UltimoEstado { get; set; }
+        public DateTime? FechaUltimoEstado { get; set; }
+    }
+
+    public class InsertEventoDto
+    {
+        public string? Observacion { get; set; }
+        public int IdUbicacion { get; set; }
+        public int IdProblemasEquipos { get; set; }
+        public int IdColaborador { get; set; }
     }
 }

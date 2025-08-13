@@ -102,3 +102,4 @@ D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\
 D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\obj\Debug\net9.0\RestApiMantenimientoEF.pdb
 D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\obj\Debug\net9.0\RestApiMantenimientoEF.genruntimeconfig.cache
 D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\obj\Debug\net9.0\ref\RestApiMantenimientoEF.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\obj\Debug\net9.0\RestApiMantenimientoEF.sourcelink.json

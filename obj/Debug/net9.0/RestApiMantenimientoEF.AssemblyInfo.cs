@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RestApiMantenimientoEF")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+19f68ba3f8a109efcd8fd67ea39d5ba7733c95c5")]
 [assembly: System.Reflection.AssemblyProductAttribute("RestApiMantenimientoEF")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RestApiMantenimientoEF")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
