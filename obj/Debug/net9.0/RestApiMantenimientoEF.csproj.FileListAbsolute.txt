@@ -103,3 +103,12 @@ D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\
 D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\obj\Debug\net9.0\RestApiMantenimientoEF.genruntimeconfig.cache
 D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\obj\Debug\net9.0\ref\RestApiMantenimientoEF.dll
 D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\obj\Debug\net9.0\RestApiMantenimientoEF.sourcelink.json
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\Microsoft.Identity.Abstractions.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
+D:\Daniel\Desarrollo\TestProjects\RestApiMantenimientoEF\RestApiMantenimientoEF\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll

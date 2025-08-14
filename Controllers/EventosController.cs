@@ -3,6 +3,8 @@ using RestApiMantenimientoEF.Modelos;
 using Microsoft.EntityFrameworkCore;  // Necesario para ToListAsync
 using RestApiMantenimientoEF.Modelos.DTOs;
 using RestApiMantenimientoEF.Interfaces;
+using RestApiMantenimientoEF.Modelos.Responses;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RestApiMantenimientoEF.Controllers
 {
@@ -20,8 +22,9 @@ namespace RestApiMantenimientoEF.Controllers
         }
 
         // Aquí puedes agregar métodos específicos para manejar eventos si es necesario
+        [Authorize]
         [HttpGet("get")]
-        public async Task<ActionResult<IEnumerable<Evento>>> GetEventos()
+        public async Task<ActionResult<AccionResponse<IEnumerable<Evento>>>> GetEventos()
         {
             /*if (_context.Eventos == null)
             {
@@ -34,11 +37,17 @@ namespace RestApiMantenimientoEF.Controllers
             {
                 return NotFound();
             }
-            return eventos.ToList();
+            //return eventos.ToList();
+            return new AccionResponse<IEnumerable<Evento>>
+            {
+                Status = 200,
+                Message = "Eventos obtenidos con éxito.",
+                Data = eventos.ToList()
+            };
         }
 
         [HttpGet("get/{id}")]
-        public async Task<ActionResult<EventoDto>> GetEventoById(int id)
+        public async Task<ActionResult<AccionResponse<EventoDto>>> GetEventoById(int id)
         {
             //var evento = await _context.Eventos.FindAsync(id);
             /*var evento = await _context.Eventos
@@ -56,23 +65,34 @@ namespace RestApiMantenimientoEF.Controllers
                 return NotFound();
             }
 
-            return Ok(evento);
+            return new AccionResponse<EventoDto>
+            {
+                Status = 200,
+                Message = "Evento obtenido con éxito.",
+                Data = evento
+            };
         }
 
         // Obtener los eventos activos de un area de soporte
         [HttpGet("get/activos/{idAreaS}")]
-        public async Task<ActionResult<IEnumerable<EventoDto>>> GetEventosActivos(int idAreaS)
+        public async Task<ActionResult<AccionResponse<IEnumerable<EventoDto>>>> GetEventosActivos(int idAreaS)
         {
             var eventos = await _eventoRepository.GetEventosActivosAsync(idAreaS);
             if (eventos == null || !eventos.Any())
             {
                 return NotFound();
             }
-            return eventos.ToList();
+            //return eventos.ToList();
+            return new AccionResponse<IEnumerable<EventoDto>>
+            {
+                Status = 200,
+                Message = "Eventos activos obtenidos con éxito.",
+                Data = eventos.ToList()
+            };
         }
 
         [HttpPost("create/")]
-        public async Task<ActionResult<Evento>> PostEvento([FromBody] InsertEventoDto evento)
+        public async Task<ActionResult<AccionResponse<EventoDto>>> PostEvento([FromBody] InsertEventoDto evento)
         {
             var eventoCreado = await _eventoRepository.CreateEventoAsync(evento);
             if (eventoCreado == null)
@@ -92,23 +112,53 @@ namespace RestApiMantenimientoEF.Controllers
             });
 
             // Aquí está el cambio. Apuntamos al nombre del método y pasamos el id.
-            return CreatedAtAction(nameof(GetEventoById), new { id = eventoCreado.IdEvento }, eventoCreado);
+            //return CreatedAtAction(nameof(GetEventoById), new { id = eventoCreado.IdEvento }, eventoCreado);
+            return new AccionResponse<EventoDto>
+            {
+                Status = 201,
+                Message = "Evento creado con éxito.",
+                Data = new EventoDto
+                {
+                    IdEvento = eventoCreado.IdEvento,
+                    Observacion = eventoCreado.Observacion,
+                    FechaReporte = eventoCreado.FechaReporte,
+                    FechaResolucion = eventoCreado.FechaResolucion,
+                    Activo = eventoCreado.Activo,
+                    ComentariosFinales = eventoCreado.ComentariosFinales,
+                    NombreUbicacion = eventoCreado.IdUbicacionNavigation?.NombreUbicacion
+                }
+            };
         }
 
         [HttpPost("create/detalles")]
-        public async Task<ActionResult> PostEventoConDetalles([FromBody] InsertEventoDto evento)
+        public async Task<ActionResult<AccionResponse<EventoDto>>> PostEventoConDetalles([FromBody] InsertEventoDto evento)
         {
             var eventoCreado = await _eventoRepository.CreateEventoConDetallesAsync(evento);
             if (eventoCreado == null)
             {
                 return Problem("Error al crear el evento.");
             }
+            return new AccionResponse<EventoDto>
+            {
+                Status = 201,
+                Message = "Evento creado con éxito.",
+                Data = new EventoDto
+                {
+                    IdEvento = eventoCreado.IdEvento,
+                    Observacion = eventoCreado.Observacion,
+                    FechaReporte = eventoCreado.FechaReporte,
+                    FechaResolucion = eventoCreado.FechaResolucion,
+                    Activo = eventoCreado.Activo,
+                    ComentariosFinales = eventoCreado.ComentariosFinales,
+                    NombreUbicacion = eventoCreado.IdUbicacionNavigation?.NombreUbicacion
+                }
+            };
 
-            return CreatedAtAction(nameof(GetEventoById), new { id = eventoCreado.IdEvento }, eventoCreado);
+            //return CreatedAtAction(nameof(GetEventoById), new { id = eventoCreado.IdEvento }, eventoCreado);
         }
 
         [HttpPut("put/{id}")]
-        public async Task<IActionResult> PutEvento(int id, [FromBody] Evento evento)
+        public async Task<ActionResult<AccionResponse<EventoDto>>> PutEvento(int id, [FromBody] Evento evento)
         {
             if (id != evento.IdEvento)
             {
@@ -121,41 +171,63 @@ namespace RestApiMantenimientoEF.Controllers
                 return Problem("Error al actualizar el evento.");
             }
 
-            return NoContent(); // Retorna un 204 para indicar que la operación fue exitosa
+            return new AccionResponse<EventoDto>
+            {
+                Status = 204,
+                Message = "Evento actualizado con éxito.",
+                Data = new EventoDto
+                {
+                    IdEvento = evento.IdEvento,
+                    Observacion = evento.Observacion,
+                    FechaReporte = evento.FechaReporte,
+                    FechaResolucion = evento.FechaResolucion,
+                    Activo = evento.Activo,
+                    ComentariosFinales = evento.ComentariosFinales,
+                    NombreUbicacion = evento.IdUbicacionNavigation?.NombreUbicacion
+                }
+            };
         }
 
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteEvento(int id)
+        public async Task<ActionResult<AccionResponse<bool>>> DeleteEvento(int id)
         {
             var eventoEliminado = await _eventoRepository.DeleteEventoAsync(id);
             if (!eventoEliminado)
             {
                 return Problem("Error al eliminar el evento.");
             }
-
-            return NoContent(); // Retorna un 204 para indicar que la operación fue exitosa
+            return new AccionResponse<bool>
+            {
+                Status = 204,
+                Message = "Evento eliminado con éxito.",
+                Data = true
+            };
         }
 
         [HttpPost("InsertAccion")]
-        public async Task<IActionResult> InsertarAccionAsync([FromBody] AccionDTO accionDTO)
+        public async Task<ActionResult<AccionResponse<bool>>> InsertarAccionAsync([FromBody] AccionDTO accionDTO)
         {
             try
             {
                 var insertarNuevaAccion = await _eventoRepository.InsertAccionAsync(accionDTO);
-                return NoContent(); // Retorna un 204 para indicar que la operación fue exitosa
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message); // 404 Not Found
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message); // 400 Bad Request
+                return new AccionResponse<bool>
+                {
+                    Status = 201,
+                    Message = "Acción insertada con éxito.",
+                    Data = insertarNuevaAccion
+                };
             }
             catch (Exception ex)
             {
-                return Problem("Error al insertar la acción.");
+                return new AccionResponse<bool>
+                {
+                    Status = 500,
+                    Message = $"Error al insertar la acción: {ex.Message}",
+                    Data = false
+                };
             }
         }
+        
+        
     }
 }
